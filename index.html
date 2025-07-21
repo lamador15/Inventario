@@ -87,7 +87,7 @@
 
   <nav>
     <button onclick="showSection('add')">➕ Añadir Material</button>
-    <button onclick="showSection('remove')">➖ Extraer Material</button>
+    <button onclick="showSection('remove')">➖ Remover Material</button>
     <button onclick="showSection('view')">📦 Ver Inventario</button>
   </nav>
 
@@ -113,21 +113,16 @@
   </section>
 
   <section id="remove">
-    <h2>Actualizar Stock</h2>
+    <h2>Remover Material</h2>
     <form onsubmit="sendToN8N(event)">
       <label>Código del material</label>
       <input type="text" name="item_code" required />
-      <label>Acción</label>
-      <select name="action">
-        <option value="add">Agregar</option>
-        <option value="remove">Quitar</option>
-        <option value="set">Establecer</option>
-      </select>
+      <input type="hidden" name="action" value="remove" />
       <label>Cantidad</label>
       <input type="number" name="quantity" required />
       <label>Notas</label>
       <input type="text" name="notes" />
-      <button class="btn-submit" type="submit">Actualizar</button>
+      <button class="btn-submit" type="submit">Remover</button>
     </form>
   </section>
 
