@@ -1,120 +1,121 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventario Eléctrico</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #003366;
-      color: white;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      color: #333;
     }
-    h1 {
+    header {
+      background-color: #0056b3;
+      color: white;
+      padding: 1em;
       text-align: center;
     }
-    form {
-      margin-bottom: 30px;
-      border: 1px solid white;
-      padding: 15px;
-      border-radius: 10px;
+    main {
+      padding: 2em;
     }
-    label {
+    section {
+      margin-bottom: 2em;
+      background: white;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    label, input, button, select {
       display: block;
-      margin-top: 10px;
-    }
-    input, select, button {
-      padding: 8px;
-      margin-top: 5px;
       width: 100%;
-      border-radius: 5px;
-      border: none;
+      margin-bottom: 0.5em;
+      padding: 0.5em;
     }
     button {
-      background-color: #0055aa;
+      background-color: #0056b3;
       color: white;
-      margin-top: 15px;
+      border: none;
       cursor: pointer;
+    }
+    button:hover {
+      background-color: #004494;
     }
   </style>
 </head>
 <body>
-  <h1>📦 Inventario Eléctrico</h1>
+  <header>
+    <h1>📦 Inventario Eléctrico</h1>
+  </header>
+  <main>
+    <section>
+      <h2>➕ Añadir Material</h2>
+      <form id="add-form">
+        <input type="text" id="item_code" placeholder="Código del Material" required />
+        <input type="text" id="item_name" placeholder="Nombre del Material" required />
+        <input type="number" id="quantity" placeholder="Cantidad" required />
+        <button type="submit">Agregar</button>
+      </form>
+    </section>
 
-  <!-- Añadir material -->
-  <form id="add-form">
-    <h2>➕ Añadir Material</h2>
-    <label>Código del Material:</label>
-    <input type="text" id="add-code" required>
-    <label>Nombre:</label>
-    <input type="text" id="add-name" required>
-    <label>Cantidad:</label>
-    <input type="number" id="add-qty" required>
-    <button type="submit">Agregar</button>
-  </form>
+    <section>
+      <h2>➖ Remover Material</h2>
+      <form id="remove-form">
+        <input type="text" id="remove_code" placeholder="Código del Material" required />
+        <input type="number" id="remove_quantity" placeholder="Cantidad a Remover" required />
+        <button type="submit">Remover</button>
+      </form>
+    </section>
 
-  <!-- Remover material -->
-  <form id="remove-form">
-    <h2>➖ Remover Material</h2>
-    <label>Código del Material:</label>
-    <input type="text" id="remove-code" required>
-    <label>Cantidad a Remover:</label>
-    <input type="number" id="remove-qty" required>
-    <button type="submit">Remover</button>
-  </form>
-
-  <!-- Ver inventario (por ahora en consola) -->
-  <form id="view-form">
-    <h2>📋 Ver Inventario</h2>
-    <button type="submit">Ver en consola</button>
-  </form>
-
+    <section>
+      <h2>📋 Ver Inventario</h2>
+      <button onclick="mostrarInventario()">Mostrar Inventario</button>
+      <pre id="inventario"></pre>
+    </section>
+  </main>
   <script>
     const webhookUrl = "https://n8n.automatedflow.net/webhook/inventory";
 
-    // Añadir material
-    document.getElementById("add-form").addEventListener("submit", async function(e) {
+    document.getElementById('add-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const payload = {
-        action: "create",
-        item_code: document.getElementById("add-code").value.toUpperCase(),
-        nombre: document.getElementById("add-name").value,
-        quantity: parseInt(document.getElementById("add-qty").value),
-        last_updated: new Date().toISOString()
+      const data = {
+        action: 'create',
+        item_code: document.getElementById('item_code').value,
+        item_name: document.getElementById('item_name').value,
+        quantity: parseInt(document.getElementById('quantity').value),
       };
       await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       });
-      alert("✅ Material agregado");
-      this.reset();
+      alert('✅ Material agregado');
+      e.target.reset();
     });
 
-    // Remover material
-    document.getElementById("remove-form").addEventListener("submit", async function(e) {
+    document.getElementById('remove-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const payload = {
-        action: "remove",
-        item_code: document.getElementById("remove-code").value.toUpperCase(),
-        quantity: parseInt(document.getElementById("remove-qty").value),
-        last_updated: new Date().toISOString()
+      const data = {
+        action: 'remove',
+        item_code: document.getElementById('remove_code').value,
+        quantity: parseInt(document.getElementById('remove_quantity').value),
       };
       await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       });
-      alert("✅ Material removido");
-      this.reset();
+      alert('✅ Material removido');
+      e.target.reset();
     });
 
-    // Ver inventario (simulado)
-    document.getElementById("view-form").addEventListener("submit", function(e) {
-      e.preventDefault();
-      console.log("👉 Funcionalidad de ver inventario aún no conectada.");
-      alert("Abre la consola del navegador para ver inventario (aún no implementado)");
-    });
+    async function mostrarInventario() {
+      const res = await fetch('https://api.jsonbin.io/v3/b/tu-endpoint-simulacion'); // Solo ejemplo
+      const data = await res.json();
+      document.getElementById('inventario').textContent = JSON.stringify(data, null, 2);
+    }
   </script>
 </body>
 </html>
