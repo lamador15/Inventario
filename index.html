@@ -108,5 +108,59 @@
 
     // Lógica de envío a n8n puede integrarse aquí
   </script>
+  <script>
+  const webhookUrl = 'https://n8n.automatedflow.net/webhook/inventory'; // ✅ Producción
+
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  showSection('add'); // Mostrar por defecto
+
+  // Añadir Material
+  document.getElementById('add-item-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = {
+      action: 'create',
+      item_code: document.getElementById('item-code').value.toUpperCase(),
+      item_name: document.getElementById('item-name').value,
+      quantity: parseInt(document.getElementById('quantity').value)
+    };
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      alert('✅ Material añadido');
+      this.reset();
+    } else {
+      alert('❌ Error al añadir material');
+    }
+  });
+
+  // Remover Material
+  document.getElementById('remove-item-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = {
+      action: 'remove',
+      item_code: document.getElementById('remove-code').value.toUpperCase(),
+      quantity: parseInt(document.getElementById('remove-quantity').value)
+    };
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      alert('✅ Material removido');
+      this.reset();
+    } else {
+      alert('❌ Error al remover material');
+    }
+  });
+</script>
+
 </body>
 </html>
