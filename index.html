@@ -535,10 +535,11 @@ Columna I: qr_generated (Booleano) - Si ya se generó QR</div>
     <script>
         // Configuración
         let config = {
-            webhookUrl: '',
-            sheetsId: '',
-            inventory: []
-        };
+        webhookUrl: 'https://n8n.automatedflow.net/webhook/inventory',
+        sheetsId: '',
+        inventory: []
+};
+
 
         // Cargar configuración del localStorage (para demo)
         function loadConfig() {
