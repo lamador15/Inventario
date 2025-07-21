@@ -811,3 +811,30 @@ Columna I: qr_generated (Booleano) - Si ya se generó QR</div>
             this.reset();
             displayInventory();
         });
+<script>
+    // Enviar datos al webhook de N8N
+    function sendToN8N(payload) {
+        fetch(config.webhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Error al enviar datos a N8N');
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Datos enviados a N8N:', data);
+        })
+        .catch(error => {
+            console.error('❌ Error al enviar a N8N:', error);
+        });
+    }
+
+    // Ejecutar al cargar
+    window.addEventListener('DOMContentLoaded', loadConfig);
+</script>
+
+
