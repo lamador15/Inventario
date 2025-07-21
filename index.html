@@ -1,121 +1,112 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inventario Eléctrico</title>
   <style>
     body {
+      background-color: #003366;
+      color: white;
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f0f0f0;
-      color: #333;
     }
     header {
-      background-color: #0056b3;
-      color: white;
-      padding: 1em;
+      background-color: #002244;
+      padding: 1rem;
       text-align: center;
+      font-size: 1.8rem;
     }
-    main {
-      padding: 2em;
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      background-color: #004080;
+      padding: 0.5rem;
     }
-    section {
-      margin-bottom: 2em;
-      background: white;
-      padding: 1em;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    label, input, button, select {
-      display: block;
-      width: 100%;
-      margin-bottom: 0.5em;
-      padding: 0.5em;
-    }
-    button {
-      background-color: #0056b3;
-      color: white;
+    nav button {
+      padding: 0.5rem 1rem;
+      background-color: #0055aa;
       border: none;
+      color: white;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #004494;
+    .section {
+      display: none;
+      padding: 1rem;
+    }
+    .active {
+      display: block;
+    }
+    input, select {
+      display: block;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      width: 100%;
+      max-width: 400px;
+    }
+    label {
+      margin-top: 1rem;
+    }
+    form {
+      max-width: 500px;
+      margin: auto;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>📦 Inventario Eléctrico</h1>
-  </header>
-  <main>
-    <section>
-      <h2>➕ Añadir Material</h2>
-      <form id="add-form">
-        <input type="text" id="item_code" placeholder="Código del Material" required />
-        <input type="text" id="item_name" placeholder="Nombre del Material" required />
-        <input type="number" id="quantity" placeholder="Cantidad" required />
-        <button type="submit">Agregar</button>
-      </form>
-    </section>
+  <header>📦 Inventario Eléctrico</header>
+  <nav>
+    <button onclick="showSection('add')">➕ Añadir Material</button>
+    <button onclick="showSection('remove')">➖ Remover Material</button>
+    <button onclick="showSection('inventory')">📋 Ver Inventario</button>
+  </nav>
 
-    <section>
-      <h2>➖ Remover Material</h2>
-      <form id="remove-form">
-        <input type="text" id="remove_code" placeholder="Código del Material" required />
-        <input type="number" id="remove_quantity" placeholder="Cantidad a Remover" required />
-        <button type="submit">Remover</button>
-      </form>
-    </section>
+  <div id="add" class="section">
+    <h2>Añadir Material</h2>
+    <form id="add-item-form">
+      <label for="item-code">Código</label>
+      <input type="text" id="item-code" required>
 
-    <section>
-      <h2>📋 Ver Inventario</h2>
-      <button onclick="mostrarInventario()">Mostrar Inventario</button>
-      <pre id="inventario"></pre>
-    </section>
-  </main>
+      <label for="item-name">Nombre</label>
+      <input type="text" id="item-name" required>
+
+      <label for="quantity">Cantidad</label>
+      <input type="number" id="quantity" required>
+
+      <button type="submit">Guardar</button>
+    </form>
+  </div>
+
+  <div id="remove" class="section">
+    <h2>Remover Material</h2>
+    <form id="remove-item-form">
+      <label for="remove-code">Código</label>
+      <input type="text" id="remove-code" required>
+
+      <label for="remove-quantity">Cantidad a remover</label>
+      <input type="number" id="remove-quantity" required>
+
+      <button type="submit">Remover</button>
+    </form>
+  </div>
+
+  <div id="inventory" class="section">
+    <h2>Inventario Actual</h2>
+    <div id="inventory-list"></div>
+  </div>
+
   <script>
-    const webhookUrl = "https://n8n.automatedflow.net/webhook/inventory";
-
-    document.getElementById('add-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = {
-        action: 'create',
-        item_code: document.getElementById('item_code').value,
-        item_name: document.getElementById('item_name').value,
-        quantity: parseInt(document.getElementById('quantity').value),
-      };
-      await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      alert('✅ Material agregado');
-      e.target.reset();
-    });
-
-    document.getElementById('remove-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = {
-        action: 'remove',
-        item_code: document.getElementById('remove_code').value,
-        quantity: parseInt(document.getElementById('remove_quantity').value),
-      };
-      await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      alert('✅ Material removido');
-      e.target.reset();
-    });
-
-    async function mostrarInventario() {
-      const res = await fetch('https://api.jsonbin.io/v3/b/tu-endpoint-simulacion'); // Solo ejemplo
-      const data = await res.json();
-      document.getElementById('inventario').textContent = JSON.stringify(data, null, 2);
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
+
+    // Mostrar la primera sección por defecto
+    showSection('add');
+
+    // Lógica de envío a n8n puede integrarse aquí
   </script>
 </body>
 </html>
