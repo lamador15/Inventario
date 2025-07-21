@@ -6,118 +6,170 @@
   <title>Inventario Eléctrico</title>
   <style>
     body {
-      margin: 0;
-      background-color: #003366;
+      background-color: #002244;
       color: white;
       font-family: Arial, sans-serif;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
     }
-    h1 {
+    header {
+      padding: 1rem;
+      background-color: #001830;
       text-align: center;
-      font-size: 2.5em;
-      margin-bottom: 30px;
-      color: white;
+      font-size: 2rem;
+      font-weight: bold;
     }
-    input, select, button {
-      padding: 10px;
-      margin: 5px 0;
-      width: 100%;
-      box-sizing: border-box;
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    nav button {
+      padding: 0.5rem 1rem;
+      background-color: #0055aa;
+      color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    nav button:hover {
+      background-color: #0077cc;
+    }
+    section {
+      display: none;
+      padding: 1rem 2rem;
+    }
+    section.active {
+      display: block;
+    }
+    input, select {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      width: 100%;
+      max-width: 400px;
     }
     label {
       display: block;
-      margin-top: 10px;
-      font-weight: bold;
+      margin-top: 1rem;
     }
-    form {
-      max-width: 400px;
-      margin: 0 auto 40px auto;
-      background-color: #004080;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    button {
-      background-color: #0066cc;
-      color: white;
+    .btn-submit {
+      margin-top: 1rem;
+      background-color: #00bbff;
+      border: none;
+      padding: 0.5rem 1rem;
+      color: #000;
       font-weight: bold;
+      border-radius: 4px;
       cursor: pointer;
     }
-    .footer {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 0.9em;
-      opacity: 0.8;
+    .btn-submit:hover {
+      background-color: #33ccff;
+    }
+    table {
+      width: 100%;
+      max-width: 600px;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid white;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    th {
+      background-color: #003366;
     }
   </style>
 </head>
 <body>
-  <h1>Inventario Eléctrico</h1>
+  <header>Inventario Eléctrico</header>
 
-  <form id="inventory-form">
-    <label for="item_code">Código del ítem</label>
-    <input type="text" id="item_code" required />
+  <nav>
+    <button onclick="showSection('add')">➕ Añadir Material</button>
+    <button onclick="showSection('remove')">➖ Extraer Material</button>
+    <button onclick="showSection('view')">📦 Ver Inventario</button>
+  </nav>
 
-    <label for="item_name">Nombre</label>
-    <input type="text" id="item_name" required />
+  <section id="add" class="active">
+    <h2>Añadir Material</h2>
+    <form onsubmit="sendToN8N(event, 'create')">
+      <label>Código del material</label>
+      <input type="text" name="item_code" required />
+      <label>Nombre</label>
+      <input type="text" name="item_name" required />
+      <label>Categoría</label>
+      <input type="text" name="category" />
+      <label>Cantidad inicial</label>
+      <input type="number" name="quantity" required />
+      <label>Unidad</label>
+      <input type="text" name="unit" />
+      <label>Ubicación</label>
+      <input type="text" name="location" />
+      <label>Stock mínimo</label>
+      <input type="number" name="min_stock" value="5" />
+      <button class="btn-submit" type="submit">Enviar</button>
+    </form>
+  </section>
 
-    <label for="category">Categoría</label>
-    <input type="text" id="category" />
+  <section id="remove">
+    <h2>Actualizar Stock</h2>
+    <form onsubmit="sendToN8N(event)">
+      <label>Código del material</label>
+      <input type="text" name="item_code" required />
+      <label>Acción</label>
+      <select name="action">
+        <option value="add">Agregar</option>
+        <option value="remove">Quitar</option>
+        <option value="set">Establecer</option>
+      </select>
+      <label>Cantidad</label>
+      <input type="number" name="quantity" required />
+      <label>Notas</label>
+      <input type="text" name="notes" />
+      <button class="btn-submit" type="submit">Actualizar</button>
+    </form>
+  </section>
 
-    <label for="quantity">Cantidad</label>
-    <input type="number" id="quantity" required />
-
-    <label for="unit">Unidad</label>
-    <input type="text" id="unit" />
-
-    <label for="location">Ubicación</label>
-    <input type="text" id="location" />
-
-    <label for="min_stock">Stock mínimo</label>
-    <input type="number" id="min_stock" />
-
-    <button type="submit">Enviar a Inventario</button>
-  </form>
-
-  <div class="footer">© 2025 Inventario Eléctrico | Desarrollado para integración con n8n</div>
+  <section id="view">
+    <h2>Inventario (Vista rápida local)</h2>
+    <table id="inventory-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Cantidad</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
 
   <script>
-    const webhookUrl = "https://n8n.automatedflow.net/webhook/inventory";
+    const webhookUrl = 'https://n8n.automatedflow.net/webhook/inventory';
 
-    document.getElementById("inventory-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      
-      const payload = {
-        action: "create",
-        item_code: document.getElementById("item_code").value,
-        item_name: document.getElementById("item_name").value,
-        category: document.getElementById("category").value,
-        quantity: parseInt(document.getElementById("quantity").value),
-        unit: document.getElementById("unit").value,
-        location: document.getElementById("location").value,
-        min_stock: parseInt(document.getElementById("min_stock").value),
-        last_updated: new Date().toISOString()
-      };
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
 
-      try {
-        const res = await fetch(webhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+    function sendToN8N(event, forceAction = null) {
+      event.preventDefault();
+      const form = event.target;
+      const data = Object.fromEntries(new FormData(form).entries());
+      data.action = forceAction || data.action || 'set';
+      data.timestamp = new Date().toISOString();
 
-        if (res.ok) {
-          alert("✅ Inventario actualizado correctamente");
-          e.target.reset();
-        } else {
-          alert("❌ Error al enviar los datos");
-        }
-      } catch (err) {
-        alert("❌ No se pudo conectar con el servidor");
-        console.error(err);
-      }
-    });
+      fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.ok ? alert('✅ Enviado correctamente') : alert('❌ Error al enviar'))
+      .catch(err => alert('❌ Error de conexión: ' + err.message));
+
+      form.reset();
+    }
   </script>
 </body>
 </html>
